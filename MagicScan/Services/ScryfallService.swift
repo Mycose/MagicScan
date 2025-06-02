@@ -9,19 +9,39 @@ import Foundation
 
 class ScryfallService {
     func fetchCard(named name: String, completion: @escaping (Card?) -> Void) {
+        print("fetchCard")
         let encodedName = name.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
         guard let url = URL(string: "https://api.scryfall.com/cards/named?fuzzy=\(encodedName)") else {
+            print("soucis d'ulr?")
             completion(nil)
             return
         }
 
-        URLSession.shared.dataTask(with: url) { data, _, _ in
-            guard let data = data,
-                  let card = try? JSONDecoder().decode(Card.self, from: data) else {
+        URLSession.shared.dataTask(with: url) { data, response, error in
+            if let error = error {
+                print("❌ Erreur réseau : \(error.localizedDescription)")
                 completion(nil)
                 return
             }
-            completion(card)
+            
+            guard let data = data else {
+                print("❌ Données vides")
+                completion(nil)
+                return
+            }
+            
+            do {
+                print("decode")
+                let card = try JSONDecoder().decode(Card.self, from: data)
+print("completionCard")
+                completion(card)
+            } catch {
+                print("❌ Erreur de décodage JSON : \(error)")
+                if let jsonString = String(data: data, encoding: .utf8) {
+                    print("🔍 Données reçues : \(jsonString)")
+                }
+                completion(nil)
+            }
         }.resume()
     }
     

@@ -28,34 +28,37 @@ struct CardListView: View {
                         .padding()
                 } else {
                     ScrollView {
-                        Text("Cartes cherché: \(titlesToSearch.joined(separator: ", "))")
-                        List(cards) { card in
-                            HStack(spacing: 16) {
-                                if let urlString = card.imageUris?.normal,
-                                   let url = URL(string: urlString) {
-                                    AsyncImage(url: url) { image in
-                                        image.resizable()
-                                    } placeholder: {
-                                        ProgressView()
+                        VStack(alignment: .leading) {
+                            Text("Cartes cherchées: \(titlesToSearch.joined(separator: ", "))")
+                            ForEach(cards) { card in
+                                HStack(spacing: 16) {
+                                    if let urlString = card.imageUris?.normal,
+                                       let url = URL(string: urlString) {
+                                        AsyncImage(url: url) { image in
+                                            image.resizable()
+                                        } placeholder: {
+                                            ProgressView()
+                                        }
+                                        .frame(width: 60, height: 85)
+                                        .cornerRadius(4)
                                     }
-                                    .frame(width: 60, height: 85)
-                                    .cornerRadius(4)
+                                    
+                                    VStack(alignment: .leading) {
+                                        Text(card.name)
+                                            .font(.headline)
+                                        Text(card.typeLine)
+                                            .font(.subheadline)
+                                            .foregroundColor(.secondary)
+                                    }
                                 }
-                                
-                                VStack(alignment: .leading) {
-                                    Text(card.name)
-                                        .font(.headline)
-                                    Text(card.typeLine)
-                                        .font(.subheadline)
-                                        .foregroundColor(.secondary)
-                                }
+                                .padding(.vertical, 4)
                             }
-                            .padding(.vertical, 4)
                         }
                     }
                 }
             }
             .navigationTitle("Cartes Magic")
+            .navigationBarTitleDisplayMode(.large)
             .onAppear {
                 if !hasLoaded {
                     isLoading = true

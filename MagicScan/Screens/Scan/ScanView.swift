@@ -10,40 +10,52 @@ import SwiftUI
 struct ScanView: View {
     @State private var showCamera = false
     @State private var image: UIImage?
-    @State private var cardTitles: [String]?
+    @State private var cardTitles: [String] = []
+    @State private var navigateToResults = false
     
     private let cardRecognizer: CardRecognizer = CardRecognizer()
     
     var body: some View {
-        VStack {
-            if let image = image {
-                Image(uiImage: image)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(height: 200)
-            }
-            
-            if let titles = cardTitles {
-                Text("Titres reconnu :\n\(titles.joined(separator: "\n"))")
+        NavigationStack {
+            VStack {
+                if let image = image {
+                    Image(uiImage: image)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(height: 200)
+                }
+                
+                if !cardTitles.isEmpty {
+                    Text("Titres reconnu :\n\(cardTitles.joined(separator: "\n"))")
                         .padding()
-            }
-            
-            Button("Prendre une photo") {
-                showCamera = true
-            }
-            .padding()
-            .sheet(isPresented: $showCamera) {
-                ImagePicker(sourceType: .camera, selectedImage: Binding(
-                    get: { image },
-                    set: {
-                        image = $0
-                        if let img = $0 {
-                            cardRecognizer.recognizeTitlesFromImage(img) { titles in
-                                cardTitles = titles
+                }
+                
+                Button("Prendre une photo") {
+                    showCamera = true
+                }
+                .padding()
+                .sheet(isPresented: $showCamera) {
+                    ImagePicker(sourceType: .camera, selectedImage: Binding(
+                        get: { image },
+                        set: {
+                            image = $0
+                            if let img = $0 {
+                                cardRecognizer.recognizeTitlesFromImage(img) { titles in
+                                    DispatchQueue.main.async {
+                                        self.cardTitles = titles ?? []
+                                        if !cardTitles.isEmpty {
+                                            self.navigateToResults = true
+                                        }
+                                    }
+                                }
                             }
                         }
-                    }
-                ))
+                    ))
+                }
+            }
+            .navigationTitle("Scan de cartes")
+            .navigationDestination(isPresented: $navigateToResults) {
+                CardListView(titlesToSearch: cardTitles)
             }
         }
     }

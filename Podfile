@@ -5,9 +5,7 @@ target 'MagicScan' do
   # Comment the next line if you don't want to use dynamic frameworks
   use_frameworks!
 
-  # Pods for MagicScan
-
-  pod 'GoogleMLKit/TextRecognition'
+  # Pods for MagicSca
 
   target 'MagicScanTests' do
     inherit! :search_paths

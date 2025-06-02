@@ -5,7 +5,7 @@
 //  Created by Clément on 30/05/2025.
 //
 
-import MLKit
+import UIKit
 import Vision
 
 class CardRecognizer {
@@ -47,42 +47,15 @@ class CardRecognizer {
             completion(rects)
         }
         
-        // Paramètres ajustables (plus les valeurs sont strictes, plus la détection est précise)
         request.maximumObservations = 10
-        request.minimumConfidence = 0.8
-        request.minimumAspectRatio = 0.65  // On veut des rectangles "allongés" (cartes)
+        request.minimumConfidence = 0.6
+        request.minimumAspectRatio = 0.65  // card ratio
         
         let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
         try? handler.perform([request])
     }
     
-    func recognizeTextFromImage(_ image: UIImage, completion: @escaping ([String]?) -> Void) {
-        var titles = [String]()
-        let textRecognizer = TextRecognizer.textRecognizer(options: TextRecognizerOptions())
-        let visionImage = VisionImage(image: image)
-        visionImage.orientation = image.imageOrientation
-        
-        textRecognizer.process(visionImage) { result, error in
-            guard error == nil, let result = result else {
-                print("Erreur OCR: \(error?.localizedDescription ?? "Inconnue")")
-                completion(nil)
-                return
-            }
-            
-            let thresholdHeight = image.size.height * 0.20
-            for block in result.blocks {
-                for line in block.lines {
-                    print("line = \(line.text)")
-                    let frame = line.frame
-                    if frame.origin.y < thresholdHeight {
-                        print("OUI line.text = \(line.text)")
-                        titles.append(line.text)
-                    }
-                }
-            }
-            completion(titles)
-        }
-    }
+    
     
     func recognizeTitlesFromImage(_ image: UIImage, completion: @escaping ([String]?) -> Void) {
         guard image.cgImage != nil else {
@@ -90,7 +63,8 @@ class CardRecognizer {
             return
         }
         
-        var titles = [String]()
+        
+        var titles = Set<String>()
         
         detectRectangles(in: image, completion: { [weak self] rectangles in
             guard !rectangles.isEmpty else {
@@ -99,23 +73,21 @@ class CardRecognizer {
             }
             
             let group = DispatchGroup()
-            
             for rectangle in rectangles {
                 if let cardImage = self?.cropCard(from: image, with: rectangle) {
                     group.enter()
                     
-                    self?.recognizeTextFromImage(cardImage) { texts in
-                        if let texts = texts {
-                            titles.append(contentsOf: texts)
+                    TitleRecognizer(completion: { title in
+                        if let title = title {
+                            titles.insert(title)
                         }
-                        
                         group.leave()
-                    }
+                    }).recognizeTitleFromImage(cardImage)
                 }
             }
             
             group.notify(queue: .main) {
-                completion(titles)
+                completion(titles.sorted())
             }
             
         })

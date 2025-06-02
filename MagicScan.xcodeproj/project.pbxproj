@@ -146,8 +146,6 @@
 				EB968F782DE9F59800775D07 /* Sources */,
 				EB968F792DE9F59800775D07 /* Frameworks */,
 				EB968F7A2DE9F59800775D07 /* Resources */,
-				3778A7F55833B4F3A12D58AC /* [CP] Embed Pods Frameworks */,
-				E3EFD70CD224369089ED9F71 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -191,8 +189,6 @@
 				EB968F942DE9F59A00775D07 /* Sources */,
 				EB968F952DE9F59A00775D07 /* Frameworks */,
 				EB968F962DE9F59A00775D07 /* Resources */,
-				EBA44BD4722EBC110E039E06 /* [CP] Embed Pods Frameworks */,
-				5B06D136BDFB74C9D8F5E2BB /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -318,90 +314,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		3778A7F55833B4F3A12D58AC /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-MagicScan/Pods-MagicScan-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			inputPaths = (
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-MagicScan/Pods-MagicScan-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-MagicScan/Pods-MagicScan-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		5B06D136BDFB74C9D8F5E2BB /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-MagicScan-MagicScanUITests/Pods-MagicScan-MagicScanUITests-resources-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			inputPaths = (
-			);
-			name = "[CP] Copy Pods Resources";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-MagicScan-MagicScanUITests/Pods-MagicScan-MagicScanUITests-resources-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-MagicScan-MagicScanUITests/Pods-MagicScan-MagicScanUITests-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		E3EFD70CD224369089ED9F71 /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-MagicScan/Pods-MagicScan-resources-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			inputPaths = (
-			);
-			name = "[CP] Copy Pods Resources";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-MagicScan/Pods-MagicScan-resources-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-MagicScan/Pods-MagicScan-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		EBA44BD4722EBC110E039E06 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-MagicScan-MagicScanUITests/Pods-MagicScan-MagicScanUITests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			inputPaths = (
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-MagicScan-MagicScanUITests/Pods-MagicScan-MagicScanUITests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-MagicScan-MagicScanUITests/Pods-MagicScan-MagicScanUITests-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		FB3EC5380FC9724D39C58083 /* [CP] Check Pods Manifest.lock */ = {

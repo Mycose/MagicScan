@@ -7,8 +7,8 @@
 
 import Foundation
 
-struct Card: Decodable, Identifiable {
-    var id: String { return name }
+struct Card: Codable, Identifiable {
+    let id: String
     let name: String
     let typeLine: String
     let imageUris: ImageUris?
@@ -17,9 +17,17 @@ struct Card: Decodable, Identifiable {
         case name
         case typeLine = "type_line"
         case imageUris = "image_uris"
+        case id
+    }
+    
+    init(id: String, name: String, typeLine: String, imageUris: ImageUris?) {
+        self.id = id
+        self.name = name
+        self.typeLine = typeLine
+        self.imageUris = imageUris
     }
 }
 
-struct ImageUris: Decodable {
+struct ImageUris: Codable {
     let normal: String
 }

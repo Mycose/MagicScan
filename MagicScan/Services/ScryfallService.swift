@@ -9,10 +9,9 @@ import Foundation
 
 class ScryfallService {
     func fetchCard(named name: String, completion: @escaping (Card?) -> Void) {
-        print("fetchCard")
         let encodedName = name.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+        print("URL = \("https://api.scryfall.com/cards/named?fuzzy=\(encodedName)")")
         guard let url = URL(string: "https://api.scryfall.com/cards/named?fuzzy=\(encodedName)") else {
-            print("soucis d'ulr?")
             completion(nil)
             return
         }
@@ -31,7 +30,6 @@ class ScryfallService {
             }
             
             do {
-                print("decode")
                 let card = try JSONDecoder().decode(Card.self, from: data)
 print("completionCard")
                 completion(card)

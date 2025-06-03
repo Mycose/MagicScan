@@ -9,10 +9,21 @@ import SwiftUI
 
 struct CardListView: View {
     var titlesToSearch: [String]
+    var cardTitles: String {
+        return titlesToSearch.joined(separator: ", ")
+    }
     
     @State private var isLoading = false
     @State private var hasLoaded = false
-    @State private var cards: [Card] = []
+    
+    @State private var toggledCards: [String: Bool] = [:]
+    @State private var cards: [Card] = [] {
+        didSet {
+            items = cards.map { LibraryCardItem(card: $0, amount: 1, isFavorite: false) }
+        }
+    }
+    
+    @State private var items: [LibraryCardItem] = []
     
     let service = ScryfallService()
     
@@ -27,34 +38,33 @@ struct CardListView: View {
                         .foregroundColor(.secondary)
                         .padding()
                 } else {
-                    ScrollView {
-                        VStack(alignment: .leading) {
-                            Text("Cartes cherchées: \(titlesToSearch.joined(separator: ", "))")
-                            ForEach(cards) { card in
-                                HStack(spacing: 16) {
-                                    if let urlString = card.imageUris?.normal,
-                                       let url = URL(string: urlString) {
-                                        AsyncImage(url: url) { image in
-                                            image.resizable()
-                                        } placeholder: {
-                                            ProgressView()
-                                        }
-                                        .frame(width: 60, height: 85)
-                                        .cornerRadius(4)
-                                    }
-                                    
-                                    VStack(alignment: .leading) {
-                                        Text(card.name)
-                                            .font(.headline)
-                                        Text(card.typeLine)
-                                            .font(.subheadline)
-                                            .foregroundColor(.secondary)
-                                    }
+                    ZStack {
+                        List {
+                            Section(header: Text("Cartes cherchées: \(cardTitles)")) {
+                                ForEach(items) { item in
+                                    CardListCell(item: item, isOn: binding(for: item.id))
                                 }
-                                .padding(.vertical, 4)
                             }
                         }
+                        .listStyle(.insetGrouped)
+                        
+                        VStack {
+                            Spacer()
+                            Button {
+                                
+                            } label: {
+                                Text("Add to library")
+                            }
+                            .padding()
+                            .background(.white)
+                            .clipShape(Capsule(style: .continuous))
+                            .foregroundStyle(.black)
+                            
+                        }
+                        .padding(.bottom)
                     }
+                    
+
                 }
             }
             .navigationTitle("Cartes Magic")
@@ -70,6 +80,13 @@ struct CardListView: View {
                 }
             }
         }
+    }
+    
+    private func binding(for id: String) -> Binding<Bool> {
+        Binding(
+            get: { toggledCards[id, default: false] },
+            set: { toggledCards[id] = $0 }
+        )
     }
 }
 

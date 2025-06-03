@@ -8,14 +8,12 @@
 import SwiftUI
 
 struct CardListCell: View {
-    let item: LibraryCardItem
-    let amount: Int = 1
+    @ObservedObject var item: LibraryCardItem
     let isOn: Binding<Bool>
     
     var body: some View {
         HStack(spacing: 16) {
-            Toggle("", isOn: isOn)
-                .labelsHidden()
+            Toggle("Foil?", isOn: isOn)
                 .frame(width: 50)
             
             if let urlString = item.card.imageUris?.normal,
@@ -35,6 +33,16 @@ struct CardListCell: View {
                 Text(item.card.typeLine)
                     .font(.subheadline)
                     .foregroundColor(.secondary)
+                HStack {
+                    if let eur = item.card.prices.eur {
+                        Text(eur)
+                    }
+                    if let feur = item.card.prices.eur_foil {
+                        Text("Foil: \(feur)")
+                    }
+                }
+                
+                Stepper("Number: \(item.amount)", value: $item.amount, in: 1...99)
             }
         }
         .padding(.vertical, 4)
@@ -49,8 +57,8 @@ struct PreviewWrapper: View {
     @State private var isOn: Bool = false
 
     var body: some View {
-        let card = Card(id: "ok", name: "ok", typeLine: "ok", imageUris: nil)
-        let item = LibraryCardItem(card: card, amount: 1, isFavorite: false)
+        let card = Card(id: "ok", name: "ok", typeLine: "ok", imageUris: nil, uri: "", prices: Prices())
+        let item = LibraryCardItem(card: card, amount: 1, isFavorite: false, isFoil: false)
         CardListCell(item: item, isOn: $isOn)
     }
 }

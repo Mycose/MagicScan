@@ -19,7 +19,7 @@ struct CardListView: View {
     @State private var toggledCards: [String: Bool] = [:]
     @State private var cards: [Card] = [] {
         didSet {
-            items = cards.map { LibraryCardItem(card: $0, amount: 1, isFavorite: false) }
+            items = cards.map { LibraryCardItem(card: $0, amount: 1, isFavorite: false, isFoil: false) }
         }
     }
     

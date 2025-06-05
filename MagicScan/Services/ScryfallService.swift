@@ -8,57 +8,57 @@
 import Foundation
 
 class ScryfallService {
-    func fetchCard(named name: String, completion: @escaping (Card?) -> Void) {
+    func fetchCard(named name: String) async -> Card? {
         let encodedName = name.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
         print("URL = \("https://api.scryfall.com/cards/named?fuzzy=\(encodedName)")")
         guard let url = URL(string: "https://api.scryfall.com/cards/named?fuzzy=\(encodedName)") else {
-            completion(nil)
-            return
+            return nil
         }
-
-        URLSession.shared.dataTask(with: url) { data, response, error in
-            if let error = error {
-                print("❌ Erreur réseau : \(error.localizedDescription)")
-                completion(nil)
-                return
-            }
-            
-            guard let data = data else {
-                print("❌ Données vides")
-                completion(nil)
-                return
-            }
-            
-            do {
-                let card = try JSONDecoder().decode(Card.self, from: data)
-print("completionCard")
-                completion(card)
-            } catch {
-                print("❌ Erreur de décodage JSON : \(error)")
-                if let jsonString = String(data: data, encoding: .utf8) {
-                    print("🔍 Données reçues : \(jsonString)")
+        
+        return await withCheckedContinuation { continuation in
+            URLSession.shared.dataTask(with: url) { data, response, error in
+                if let error = error {
+                    print("❌ Erreur réseau : \(error.localizedDescription)")
+                    continuation.resume(returning: nil)
+                    return
                 }
-                completion(nil)
-            }
-        }.resume()
+                
+                guard let data = data else {
+                    print("❌ Données vides")
+                    continuation.resume(returning: nil)
+                    return
+                }
+                
+                do {
+                    let card = try JSONDecoder().decode(Card.self, from: data)
+                    continuation.resume(returning: card)
+                } catch {
+                    print("❌ Erreur de décodage JSON : \(error)")
+                    if let jsonString = String(data: data, encoding: .utf8) {
+                        print("🔍 Données reçues : \(jsonString)")
+                    }
+                    continuation.resume(returning: nil)
+                }
+            }.resume()
+        }        
     }
     
-    func fetchCards(from names: [String], completion: @escaping ([Card]) -> Void) {
+    func fetchCards(from names: [String]) async -> [Card] {
         var cards: [Card] = []
-        let group = DispatchGroup()
         
-        for name in names {
-            group.enter()
-            fetchCard(named: name) { card in
+        await withTaskGroup(of: Card?.self) { group in
+            for name in names {
+                group.addTask {
+                    return await self.fetchCard(named: name)
+                }
+            }
+            
+            for await card in group {
                 if let card = card {
                     cards.append(card)
                 }
-                group.leave()
             }
         }
-        
-        group.notify(queue: .main) {
-            completion(cards)
-        }
+        return cards
     }
 }

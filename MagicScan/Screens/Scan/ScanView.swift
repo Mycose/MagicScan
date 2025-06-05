@@ -34,8 +34,8 @@ struct ScanView: View {
                 
                 Button("Prendre une photo") {
                     showCamera = true
-                }.disabled(isProcessingImages)
-                
+                }
+                .disabled(isProcessingImages)
                 .padding()
                 .sheet(isPresented: $showCamera) {
                     ImagePicker(sourceType: .camera, selectedImage: Binding(

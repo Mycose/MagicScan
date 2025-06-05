@@ -73,8 +73,9 @@ struct CardListView: View {
                 if !hasLoaded {
                     isLoading = true
                     hasLoaded = true
-                    service.fetchCards(from: titlesToSearch) { loadedCards in
-                        self.cards = loadedCards
+                    Task {
+                        let cards = await service.fetchCards(from: titlesToSearch)
+                        self.cards = cards
                         self.isLoading = false
                     }
                 }

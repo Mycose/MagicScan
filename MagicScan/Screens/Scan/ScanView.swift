@@ -13,6 +13,8 @@ struct ScanView: View {
     @State private var cardTitles: [String] = []
     @State private var navigateToResults = false
     
+    @State private var isProcessingImages = false
+    
     private let cardRecognizer: CardRecognizer = CardRecognizer()
     
     var body: some View {
@@ -32,7 +34,8 @@ struct ScanView: View {
                 
                 Button("Prendre une photo") {
                     showCamera = true
-                }
+                }.disabled(isProcessingImages)
+                
                 .padding()
                 .sheet(isPresented: $showCamera) {
                     ImagePicker(sourceType: .camera, selectedImage: Binding(
@@ -40,8 +43,10 @@ struct ScanView: View {
                         set: {
                             image = $0
                             if let img = $0 {
+                                isProcessingImages = true
                                 Task {
                                     if let titles = await cardRecognizer.recognizeTitlesFromImage(img) {
+                                        isProcessingImages = false
                                         self.cardTitles = titles
                                         if !cardTitles.isEmpty {
                                             self.navigateToResults = true

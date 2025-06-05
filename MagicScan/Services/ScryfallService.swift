@@ -8,7 +8,30 @@
 import Foundation
 
 class ScryfallService {
-    func fetchCard(named name: String) async -> Card? {
+    func fetchCards(from names: [String]) async -> [Card] {
+        var cards: [Card] = []
+        
+        await withTaskGroup(of: Card?.self) { group in
+            for name in names {
+                group.addTask {
+                    await CardFetcher.fetchCardStatic(named: name)
+                }
+            }
+            
+            var localCards: [Card] = []
+            for await card in group {
+                if let card = card {
+                    localCards.append(card)
+                }
+            }
+            cards = localCards
+        }
+        return cards
+    }
+}
+
+struct CardFetcher {
+    static func fetchCardStatic(named name: String) async -> Card? {
         let encodedName = name.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
         print("URL = \("https://api.scryfall.com/cards/named?fuzzy=\(encodedName)")")
         guard let url = URL(string: "https://api.scryfall.com/cards/named?fuzzy=\(encodedName)") else {
@@ -40,25 +63,6 @@ class ScryfallService {
                     continuation.resume(returning: nil)
                 }
             }.resume()
-        }        
-    }
-    
-    func fetchCards(from names: [String]) async -> [Card] {
-        var cards: [Card] = []
-        
-        await withTaskGroup(of: Card?.self) { group in
-            for name in names {
-                group.addTask {
-                    return await self.fetchCard(named: name)
-                }
-            }
-            
-            for await card in group {
-                if let card = card {
-                    cards.append(card)
-                }
-            }
         }
-        return cards
     }
 }

@@ -73,6 +73,8 @@ struct CardListView: View {
                 if !hasLoaded {
                     isLoading = true
                     hasLoaded = true
+                    
+                    let service = self.service
                     Task {
                         let cards = await service.fetchCards(from: titlesToSearch)
                         self.cards = cards

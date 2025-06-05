@@ -6,7 +6,7 @@
 //
 
 import UIKit
-import Vision
+@preconcurrency import Vision
 
 actor CardRecognizer {
     private func cropCard(from image: UIImage, with rect: VNRectangleObservation) -> UIImage? {
@@ -37,22 +37,24 @@ actor CardRecognizer {
         }
         
         return await withCheckedContinuation { continuation in
-            let request = VNDetectRectanglesRequest { request, error in
-                guard error == nil,
-                      let rects = request.results as? [VNRectangleObservation] else {
-                    continuation.resume(returning: [])
-                    return
+            let rectangleRequest = VNDetectRectanglesRequest { request, error in
+                DispatchQueue.main.async {
+                    guard error == nil,
+                          let rects = request.results as? [VNRectangleObservation] else {
+                        continuation.resume(returning: [])
+                        return
+                    }
+                    continuation.resume(returning: rects)
                 }
-                continuation.resume(returning: rects)
             }
-            
-            request.maximumObservations = 10
-            request.minimumConfidence = 0.6
-            request.minimumAspectRatio = 0.65
+                
+            rectangleRequest.maximumObservations = 10
+            rectangleRequest.minimumConfidence = 0.6
+            rectangleRequest.minimumAspectRatio = 0.65
             
             let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
             do {
-                try handler.perform([request])
+                try handler.perform([rectangleRequest])
             } catch {
                 continuation.resume(returning: [])
             }

@@ -8,7 +8,7 @@
 import UIKit
 import Vision
 
-class CardRecognizer {
+actor CardRecognizer {
     private func cropCard(from image: UIImage, with rect: VNRectangleObservation) -> UIImage? {
         guard let cgImage = image.cgImage else { return nil }
         
@@ -31,65 +31,61 @@ class CardRecognizer {
         return croppedImage
     }
     
-    private func detectRectangles(in image: UIImage, completion: @escaping ([VNRectangleObservation]) -> Void) {
+    private func detectRectangles(in image: UIImage) async -> [VNRectangleObservation] {
         guard let cgImage = image.cgImage else {
-            completion([])
-            return
+            return []
         }
         
-        let request = VNDetectRectanglesRequest { request, error in
-            guard error == nil else {
-                completion([])
-                return
+        return await withCheckedContinuation { continuation in
+            let request = VNDetectRectanglesRequest { request, error in
+                guard error == nil,
+                      let rects = request.results as? [VNRectangleObservation] else {
+                    continuation.resume(returning: [])
+                    return
+                }
+                continuation.resume(returning: rects)
             }
             
-            let rects = request.results as? [VNRectangleObservation] ?? []
-            completion(rects)
+            request.maximumObservations = 10
+            request.minimumConfidence = 0.6
+            request.minimumAspectRatio = 0.65
+            
+            let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
+            do {
+                try handler.perform([request])
+            } catch {
+                continuation.resume(returning: [])
+            }
         }
-        
-        request.maximumObservations = 10
-        request.minimumConfidence = 0.6
-        request.minimumAspectRatio = 0.65  // card ratio
-        
-        let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
-        try? handler.perform([request])
     }
     
     
     
-    func recognizeTitlesFromImage(_ image: UIImage, completion: @escaping ([String]?) -> Void) {
+    func recognizeTitlesFromImage(_ image: UIImage) async -> [String]? {
         guard image.cgImage != nil else {
-            completion(nil)
-            return
+            return nil
         }
         
+        let rectangles = await detectRectangles(in: image)
+        guard !rectangles.isEmpty else { return nil }
         
         var titles = Set<String>()
         
-        detectRectangles(in: image, completion: { [weak self] rectangles in
-            guard !rectangles.isEmpty else {
-                completion(nil)
-                return
-            }
-            
-            let group = DispatchGroup()
+        await withTaskGroup(of: String?.self) { group in
             for rectangle in rectangles {
-                if let cardImage = self?.cropCard(from: image, with: rectangle) {
-                    group.enter()
-                    
-                    TitleRecognizer(completion: { title in
-                        if let title = title {
-                            titles.insert(title)
-                        }
-                        group.leave()
-                    }).recognizeTitleFromImage(cardImage)
+                if let card = self.cropCard(from: image, with: rectangle) {
+                    group.addTask {
+                        return await TitleRecognizer().recognizeTitleFromImage(card)
+                    }
                 }
             }
             
-            group.notify(queue: .main) {
-                completion(titles.sorted())
+            for await result in group {
+                if let title = result {
+                    titles.insert(title)
+                }
             }
-            
-        })
+        }
+        return titles.sorted()
     }
 }

@@ -6,49 +6,44 @@
 //
 
 import UIKit
-import Vision
+@preconcurrency import Vision
 
 class TitleRecognizer {
-    let completion: ((String?) -> Void)
-    
-    init(completion: @escaping (String?) -> Void) {
-        self.completion = completion
-    }
-    
-    func recognizeTitleFromImage(_ image: UIImage) {
-        guard let cgImage = image.cgImage else {
-            completion(nil)
-            return
-        }
+    func recognizeTitleFromImage(_ image: UIImage) async -> String? {
+        guard let cgImage = image.cgImage else { return nil }
         
-        let requestHandler = VNImageRequestHandler(cgImage: cgImage)
-        
-        // Create a new request to recognize text.
-        let request = VNRecognizeTextRequest(completionHandler: recognizeTextHandler)
-
-        do {
-            // Perform the text-recognition request.
-            try requestHandler.perform([request])
-        } catch {
-            print("Unable to perform the requests: \(error).")
-        }
-    }
-    
-    func recognizeTextHandler(request: VNRequest, error: Error?) {
-        guard let observations =
-                request.results as? [VNRecognizedTextObservation] else {
-            return
-        }
-        let recognizedStrings = observations.compactMap { observation in
-            // Return the string of the top VNRecognizedText instance.
-            return observation.topCandidates(1).first?.string
-        }
-        
-        if let title = recognizedStrings.first {
-            // remove numbers
-            completion(title.replacingOccurrences(of: "\\d", with: "", options: .regularExpression))
-        } else {
-            completion(nil)
+        return await withCheckedContinuation { continuation in
+            let request = VNRecognizeTextRequest()
+            request.recognitionLevel = .accurate
+            request.usesLanguageCorrection = true
+            request.minimumTextHeight = 0.02 // optionnel
+            
+            let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
+            
+            DispatchQueue.global(qos: .userInitiated).async {
+                do {
+                    try handler.perform([request])
+                    
+                    guard let observations = request.results else {
+                        continuation.resume(returning: nil)
+                        return
+                    }
+                    
+                    let recognizedStrings = observations.compactMap {
+                        $0.topCandidates(1).first?.string
+                    }
+                    
+                    if let title = recognizedStrings.first {
+                        let cleaned = title.replacingOccurrences(of: "\\d", with: "", options: .regularExpression)
+                        continuation.resume(returning: cleaned)
+                    } else {
+                        continuation.resume(returning: nil)
+                    }
+                } catch {
+                    print("Text recognition failed: \(error)")
+                    continuation.resume(returning: nil)
+                }
+            }
         }
     }
 }

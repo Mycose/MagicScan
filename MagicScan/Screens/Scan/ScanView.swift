@@ -40,9 +40,9 @@ struct ScanView: View {
                         set: {
                             image = $0
                             if let img = $0 {
-                                cardRecognizer.recognizeTitlesFromImage(img) { titles in
-                                    DispatchQueue.main.async {
-                                        self.cardTitles = titles ?? []
+                                Task {
+                                    if let titles = await cardRecognizer.recognizeTitlesFromImage(img) {
+                                        self.cardTitles = titles
                                         if !cardTitles.isEmpty {
                                             self.navigateToResults = true
                                         }

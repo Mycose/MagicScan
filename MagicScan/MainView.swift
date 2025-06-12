@@ -19,6 +19,11 @@ struct MainView: View {
                 .tabItem {
                     Label("Librarie", systemImage: "book.pages.fill")
                 }
+            
+            FastScanView()
+                .tabItem {
+                    Label("FastScan", systemImage: "barcode.viewfinder")
+                }
         }
         
     }

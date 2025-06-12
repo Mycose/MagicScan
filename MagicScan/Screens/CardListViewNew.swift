@@ -12,11 +12,7 @@ struct CardListViewNew: View {
     @State private var hasLoaded = false
     
     @State private var toggledCards: [String: Bool] = [:]
-    var cards: [Card] = [] {
-        didSet {
-            items = cards.map { LibraryCardItem(card: $0, amount: 1, isFavorite: false, isFoil: false) }
-        }
-    }
+    var cards: [Card] = []
     
     @State private var items: [LibraryCardItem] = []
     
@@ -64,19 +60,9 @@ struct CardListViewNew: View {
             }
             .navigationTitle("Cartes Magic")
             .navigationBarTitleDisplayMode(.large)
-//            .onAppear {
-//                if !hasLoaded {
-//                    isLoading = false
-//                    hasLoaded = true
-//                    
-//                    let service = self.service
-//                    Task {
-//                        let cards = await service.fetchCards(from: titlesToSearch)
-//                        self.cards = cards
-//                        self.isLoading = false
-//                    }
-//                }
-//            }
+            .onAppear {
+                items = cards.map { LibraryCardItem(card: $0, amount: 1, isFavorite: false, isFoil: false) }
+            }
         }
     }
     

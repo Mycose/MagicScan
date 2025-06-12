@@ -61,7 +61,54 @@ actor CardRecognizer {
         }
     }
     
+    let scryfallService = ScryfallService()
     
+    private var lastTitle: String? = nil
+    private func updateLastTitle(title: String) {
+        self.lastTitle = title
+    }
+    
+    func recognizeAndGetCardFromImage(_ image: UIImage) async -> Card? {
+        guard image.cgImage != nil else {
+            return nil
+        }
+        
+        let rectangles = await detectRectangles(in: image)
+        guard !rectangles.isEmpty else { return nil }
+        
+        var cards = [Card]()
+        await withTaskGroup(of: Card?.self) { group in
+            for rectangle in rectangles {
+                if let card = self.cropCard(from: image, with: rectangle) {
+                    group.addTask {
+                        if let title = await TitleRecognizer().recognizeTitleFromImage(card) {
+                            let lhs = title
+                            let rhs = await self.lastTitle ?? ""
+                            
+                            if !StringComparator(lhs: lhs, rhs: rhs).areStringsSimilar() {
+                                let card = await self.scryfallService.fetchCard(from: title)
+                                if card != nil {
+                                    await self.updateLastTitle(title: title)
+                                }
+                                return card
+                            } else {
+                                return nil
+                            }
+                        } else {
+                            return nil
+                        }
+                    }
+                }
+            }
+            
+            for await result in group {
+                if let card = result {
+                    cards.append(card)
+                }
+            }
+        }
+        return cards.first
+    }
     
     func recognizeTitlesFromImage(_ image: UIImage) async -> [String]? {
         guard image.cgImage != nil else {

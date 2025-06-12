@@ -7,7 +7,7 @@
 
 import Foundation
 
-class ScryfallService {
+actor ScryfallService {
     func fetchCards(from names: [String]) async -> [Card] {
         var cards: [Card] = []
         
@@ -27,6 +27,10 @@ class ScryfallService {
             cards = localCards
         }
         return cards
+    }
+    
+    func fetchCard(from title: String) async -> Card? {
+        return await CardFetcher.fetchCardStatic(named: title)
     }
 }
 

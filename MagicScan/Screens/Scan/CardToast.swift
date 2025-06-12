@@ -8,9 +8,9 @@
 import SwiftUI
 
 struct CardToast: View {
-    let cardTitle: String
+    let card: Card
     var body: some View {
-        Text("Carte détectée : \(cardTitle)")
+        Text("Carte détectée : \(card.name)")
             .padding()
             .background(.black.opacity(0.8))
             .foregroundColor(.white)
@@ -21,5 +21,6 @@ struct CardToast: View {
 }
 
 #Preview {
-    CardToast(cardTitle: "coucou")
+    let card = Card.init(id: "123", name: "Test", typeLine: "okok", imageUris: nil, uri: "oko", prices: Prices.init())
+    CardToast(card: card)
 }

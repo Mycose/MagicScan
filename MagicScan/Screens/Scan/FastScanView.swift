@@ -9,8 +9,8 @@ import SwiftUI
 import AudioToolbox
 
 struct FastScanView: View {
-    @State private var cardTitles: Set<String> = []
-    @State private var lastCardTitle: String = ""
+    @State private var cards: [Card] = []
+    @State private var lastCard: Card? = nil
     @State private var navigateToResults = false
     @State private var resultToastPresented = false
     
@@ -22,12 +22,12 @@ struct FastScanView: View {
         NavigationStack {
             ZStack(alignment: .topTrailing) {
                 VStack {
-                    CameraView(cardRecognizer: cardRecognizer) { titles in
-                        if let newTitle = titles.first, newTitle != self.lastCardTitle {
+                    CameraView(cardRecognizer: cardRecognizer) { card in
+                        if lastCard?.id != card.id {
                             AudioServicesPlaySystemSound(1057)
-                            self.lastCardTitle = newTitle
-                            self.cardTitles.insert(newTitle)
-                            if !self.lastCardTitle.isEmpty {
+                            self.lastCard = card
+                            self.cards.append(card)
+                            if lastCard != nil {
                                 withAnimation {
                                     self.resultToastPresented = true
                                 }
@@ -70,13 +70,14 @@ struct FastScanView: View {
             .overlay(
                 VStack {
                     Spacer()
-                    if resultToastPresented {
-                        CardToast(cardTitle: lastCardTitle)
+                    if let card = lastCard, resultToastPresented {
+                        CardToast(card: card)
                     }
                 }
             )
             .navigationDestination(isPresented: $navigateToResults) {
-                CardListView(titlesToSearch: cardTitles.map { $0 })
+                CardListViewNew(cards: cards)
+                //CardListView(titlesToSearch: cardTitles.map { $0 })
             }
         }
     }

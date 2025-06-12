@@ -25,9 +25,9 @@ struct CameraView: UIViewRepresentable {
                 let uiImage = UIImage(cgImage: cgImage)
                 
                 Task {
-                    if let titles = await parent.cardRecognizer.recognizeTitlesFromImage(uiImage) {
+                    if let card = await parent.cardRecognizer.recognizeAndGetCardFromImage(uiImage) {
                         DispatchQueue.main.async {
-                            self.parent.onRecognized(titles)
+                            self.parent.onRecognized(card)
                         }
                     }
                     parent.isProcessing = false
@@ -39,7 +39,7 @@ struct CameraView: UIViewRepresentable {
     }
     
     let cardRecognizer: CardRecognizer
-    var onRecognized: ([String]) -> Void
+    var onRecognized: (Card) -> Void
     
     @State var isProcessing = false
     

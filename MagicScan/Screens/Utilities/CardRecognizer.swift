@@ -49,7 +49,7 @@ actor CardRecognizer {
             }
                 
             rectangleRequest.maximumObservations = 10
-            rectangleRequest.minimumConfidence = 0.6
+            rectangleRequest.minimumConfidence = 0.8
             rectangleRequest.minimumAspectRatio = 0.65
             
             let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])

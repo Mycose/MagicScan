@@ -22,12 +22,11 @@ struct FastScanView: View {
         NavigationStack {
             ZStack(alignment: .topTrailing) {
                 VStack {
-                    CameraView(cardRecognizer: cardRecognizer, isEnabled: isCameraViewEnabled) { titles in
-                        let test = titles.first ?? ""
-                        if test != self.lastCardTitle {
+                    CameraView(cardRecognizer: cardRecognizer) { titles in
+                        if let newTitle = titles.first, newTitle != self.lastCardTitle {
                             AudioServicesPlaySystemSound(1057)
-                            self.lastCardTitle = test
-                            self.cardTitles.insert(test)
+                            self.lastCardTitle = newTitle
+                            self.cardTitles.insert(newTitle)
                             if !self.lastCardTitle.isEmpty {
                                 withAnimation {
                                     self.resultToastPresented = true
